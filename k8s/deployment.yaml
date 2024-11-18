@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: whc-api
+  labels:
+    app: whc-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: whc-api
+  template:
+    metadata:
+      labels:
+        app: whc-api
+    spec:
+      containers:
+      - name: whc-api
+        image: mmcdowell/whc-api:0.1.0
+        ports:
+        - containerPort: 5000
+        env:
+        - name: CSV_PATH
+          value: /data/whc-sites.csv
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 10
+          timeoutSeconds: 2
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 10
+          timeoutSeconds: 2
+          periodSeconds: 10
+        # volumeMounts:
+        # - mountPath: /data/
+        #   name: csv-data
+      restartPolicy: Always
+      # volumes:
+      # - name: csv-data
+      #   persistentVolumeClaim:
+      #     claimName: csv-pvc
